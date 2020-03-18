@@ -41,7 +41,7 @@ i.e. All flashed with generic firmware, no need to USB flash each one with uniqu
 // LOGIC VARIABLES; USE THESE IN COMMAND LOGIC FUNCTIONING
   bool buttonStatus[5] = {0, 0, 0, 0, 0}; // READ ONLY! Button Status returned from hardware, this is the logical value.
 
-  byte masterMode = 2; // Device Master Modes: 0-(all LED off, no sensors) 1-(Freeze Answers ) 2-(True/False 1 of 2) 3-(Choose 1 of 3) 4-(Choose 1 of 4) 5-(Choose 1 of 5)
+  byte masterMode = 255; // Device Master Modes: 0-(all LED off, no sensors) 1-(Freeze Answers ) 2-(True/False 1 of 2) 3-(Choose 1 of 3) 4-(Choose 1 of 4) 5-(Choose 1 of 5)
                         // more...Choose Up tp 5 etc.. (Fast Buzz in ? )12-(Any of 2) 13-(Any of 3) 14-(Any of 4) 15-(Any of 5)
                         // 255-(TEST ALL buttons and LEDs)
 
@@ -50,7 +50,7 @@ i.e. All flashed with generic firmware, no need to USB flash each one with uniqu
 
   byte buttonMode[5] = {0, 0, 0, 0, 0};   // Button Mode Array 0-Disabled, 1-Interm, 2-ON/OFF 3-Inverted ON/OFF?
   bool LEDState[5] = {0, 0, 0, 0, 0};  // LED light effect on or off?
-  byte LEDMode[5]= {0, 0, 0, 0, 0};  // LED Effects Modes (0- Off, 1- Solid, 20-29 Flash (slow medium fast), 30-39 Pulse ((slow medium fast) Dim ? More LED arrays? or live with a "reset option" [!! Use % of Max inside functions]
+  byte LEDMode[5]= {0, 0, 0, 0, 0};  // LED Effects Modes (0- Off, 1- Solid, 20-29 Flash (fast medium slow), 30-39 Pulse ((fast medium slow) Dim ? More LED arrays? or live with a "reset option" [!! Use % of Max inside functions]
 
   byte LEDDim[5] =  {100, 100, 100, 100, 100};     // % of Allowable Bright LED is currently at. Used for dimmed modes.
 // !!!! VERY LOW #s ON 0, 3 ARE BROKEN  {3, 1, 4, 1, 1};
@@ -116,35 +116,27 @@ void Command(){
     }
     if (masterModeSetupToggle == 0){
       // Setup stuff here
-      if (buttonMode [0] != 0){(buttonMode [0] = 0);} //0= OFF
-      if (buttonMode [1] != 1){(buttonMode [1] = 1);} //1= INTERMITENT
+      if (buttonMode [0] != 0){(buttonMode [0] = 0);}
+      if (buttonMode [1] != 1){(buttonMode [1] = 1);}
       if (buttonMode [2] != 0){(buttonMode [2] = 0);}
       if (buttonMode [3] != 1){(buttonMode [3] = 1);}
       if (buttonMode [4] != 0){(buttonMode [4] = 0);}
-      if (LEDMode [0] != 0){(LEDMode [0] = 0);} //0= OFF
-      if (LEDMode [1] != 1){(LEDMode [1] = 1);} //1=Solid On
+      if (LEDMode [0] != 0){(LEDMode [0] = 0);}
+      if (LEDMode [1] != 1){(LEDMode [1] = 1);}
       if (LEDMode [2] != 0){(LEDMode [2] = 0);}
       if (LEDMode [3] != 1){(LEDMode [3] = 1);}
       if (LEDMode [4] != 0){(LEDMode [4] = 0);}
-
-      if (LEDState [1] != 1){(LEDState [1] = 1);}
-      if (LEDState [3] != 1){(LEDState [3] = 1);}
       masterModeSetupToggle = 1;
     }
     // MODE LOGIC
     if (buttonStatus[1] == 1 && buttonStatus[3] == 0)
-      { LEDMode[1] = 28; //28= flash fast
-        LEDMode[3] = 1; //1=Solid On
+      { LEDState[1] == 1;
+        LEDState[3] == 0;
       }
     if (buttonStatus[1] == 0 && buttonStatus[3] == 1)
-      { LEDMode[1] = 1;
-        LEDMode[3] = 28;
+      { LEDState[1] == 1;
+        LEDState[3] == 0;
       }
-      if (buttonStatus[1] == 1 && buttonStatus[3] == 1)
-        { LEDMode[1] = 1;
-          LEDMode[3] = 1;
-        }
-
 
   }// ==========================================================
   // MORE Master Modes here....
@@ -153,33 +145,6 @@ void Command(){
       // MORE Master Modes here....
         // MORE Master Modes here....
           // MORE Master Modes here....
-
-// ======== MASTER MODE 254 - TEST ALL BUTTONS and LEDs ========= If buttonStatus is high, flash the LED!
-if (masterMode == 254){
-  // Setup the new MODE one time
-  if (previousMasterMode != 254) {
-    masterModeSetupToggle = 0;
-    previousMasterMode = 254;
-    }
-  if (masterModeSetupToggle == 0){
-  // Setup stuff here
-    for (byte i = 0; i<=4; i++){
-      if (buttonMode [i] != 1){(buttonMode [i] = 1);} // 1= INTERMITENT
-      if (LEDMode [i] != 1){(LEDMode [i] = 1);} // 1= SOLID
-      if (LEDState [i] != 1){(LEDState [i] = 1);} // 1= ON
-      masterModeSetupToggle = 1;
-      }
-    }
-  // MODE LOGIC
-    for (byte i = 0; i<=4; i++){
-    if (buttonStatus[i] == 1) {
-      if (LEDMode[i] != 28){LEDMode[i] = 28;}
-      }
-    if (buttonStatus[i] == 0) {
-      if (LEDMode[i] != 1){LEDMode[i] = 1;}
-      }
-    }
-  }// ==========================================================
 
   // ======== MASTER MODE 255 - TEST ALL BUTTONS and LEDs ========= If buttonStatus is high, light the LED!
   if (masterMode == 255){
@@ -225,7 +190,7 @@ void UpdateLEDS(){
         else if (LEDMode[i] == 28){LEDperiod[i] = 100;}
         else if (LEDMode[i] == 29){LEDperiod[i] =  50;}
 
-        if (LEDState[i] == 1){
+        if (buttonStatus[i] == 1){
           if (LEDNextUpdate[i] <= millis() ){
             if  (LEDCurValue[i] == LEDCurBright[i]){
                 LEDCurValue[i] = 0;
