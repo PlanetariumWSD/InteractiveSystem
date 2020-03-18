@@ -5,15 +5,15 @@
 Hardware API for Server Control ========================
 
 **Chair/Device should send to server (when changes are made)
-# bool buttonStatus[5] = {0, 0, 0, 0, 0};  The only information we want to hear back from the chairs is button's status.
+# bool buttonStatus[5] = {0, 0, 0, 0, 0};  The only information we want to hear back from the chairs is button's status.
 
 **Server modifies these variables for routine control:
-# byte masterMode = 255;  One Byte to each chair sets device in any of 255 modes of operation. (See below for mode desciption for each.)
-# byte LEDDim[5] =  {100, 100, 100, 100, 100}; Any of the modes can be dimmed on the fly.
+# byte masterMode = 255;  One Byte to each chair sets device in any of 255 modes of operation. (See below for mode description for each.)
+# byte LEDDim[5] =  {100, 100, 100, 100, 100}; Any of the modes can be dimmed on the fly.
 
-** Server modifies these varaibles and stores them into EEPROM.
-# byte LEDMaxBright[5] = {45, 255, 30, 100, 100};  Master Max Brightness Values of individual LEDs to balance them out,  0-255 Anything over 125 is barely noticable to eye
-# Network Specific information, IP address, Socket, Server IP etc...; This will be set on first boot remotely and/or reparied/replacement unit must be installed.
+** Server modifies these variables and stores them into EEPROM.
+# byte LEDMaxBright[5] = {45, 255, 30, 100, 100};  Master Max Brightness Values of individual LEDs to balance them out,  0-255 Anything over 125 is barely noticable to eye
+# Network Specific information, IP address, Socket, Server IP etc...; This will be set on first boot remotely and/or repaired/replacement unit must be installed.
 i.e. All flashed with generic firmware, no need to USB flash each one with unique network info.
 */
 // ===========================================================
