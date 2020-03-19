@@ -44,7 +44,7 @@ i.e. All flashed with generic firmware, no need to USB flash each one with uniqu
 
   bool buttonStatus[5] = {0, 0, 0, 0, 0}; // READ ONLY! Button Status returned from hardware for modes to process into Output.
 
-  byte masterMode = 0; // Device Master Modes: 0-(all LED off, no sensors) 1-(Freeze Answers ) 2-(True/False 1 of 2) 3-(Choose 1 of 3) 4-(Choose 1 of 4) 5-(Choose 1 of 5)
+  byte masterMode = 2; // Device Master Modes: 0-(all LED off, no sensors) 1-(Freeze Answers ) 2-(True/False 1 of 2) 3-(Choose 1 of 3) 4-(Choose 1 of 4) 5-(Choose 1 of 5)
                         // more...Choose Up tp 5 etc.. (Fast Buzz in ? )12-(Any of 2) 13-(Any of 3) 14-(Any of 4) 15-(Any of 5)
                         // 255-(TEST ALL buttons and LEDs)
 
@@ -73,16 +73,7 @@ void setup(){
 // ##################################################################################
 // FUNCTIONS =================================
 // ##################################################################################
-void ReceiveCommnds(){ // RECEIVE AND PARSE COMMANDS FROM SERVER.
-
-// NEEDS TO BE BUILT
-
-}
-// ##################################################################################
-void CommandInterp(){ // SETS THE DEVICE UP BASED ON MASTER MODE NUMBER SENT BY SERVER
-  // ======== EXECUTE SERVER COMMANDS-  =========
-
-
+void Command(){ // SETS THE DEVICE UP BASED ON MASTER MODE NUMBER SENT BY SERVER
 
   // ======== MASTER MODE 0 - STANDBY =========
   if (masterMode == 0){
@@ -244,8 +235,10 @@ if (masterMode == 254){
 // ##################################################################################
 void UpdateServer(){ // TEST FOR CHANGES IN buttonOutput AND SEND TO SERVER.
   if (buttonOutput[0] != buttonOutputCache[0] || buttonOutput[1] != buttonOutputCache[1] || buttonOutput[2] != buttonOutputCache[2] || buttonOutput[3] != buttonOutputCache[3] || buttonOutput[4] != buttonOutputCache[4]){
-  // Send entire buttonOutput array? to make parsing easier???
   for (byte i = 0; i<=4; i++){buttonOutputCache[i] = buttonOutput[i];} // preserve what was sent to cache.
+
+  // Send entire buttonOutput array? to make parsing easier???
+
   }
 }
 // ##################################################################################
@@ -341,8 +334,7 @@ void GetButtonStatus(){
 }
 // ##################################################################################
 void loop(){
-  ReceiveCommnds();
-  CommandInterp();
+  Command();
   GetButtonStatus();
   UpdateLEDS();
   UpdateServer();

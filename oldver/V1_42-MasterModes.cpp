@@ -5,7 +5,7 @@
 Hardware API for Server Control ========================
 
 **Chair/Device should send to server (when changes are made)
-# bool buttonOutput[5] = {0, 0, 0, 0, 0};  The only information we want to hear back from the chairs is button's status.
+# bool buttonStatus[5] = {0, 0, 0, 0, 0};  The only information we want to hear back from the chairs is button's status.
 
 **Server modifies these variables for routine control:
 # byte masterMode = 255;  One Byte to each chair sets device in any of 255 modes of operation. (See below for mode description for each.)
@@ -39,26 +39,23 @@ i.e. All flashed with generic firmware, no need to USB flash each one with uniqu
 // ===========================================================
 // ===========================================================
 // LOGIC VARIABLES; USE THESE IN COMMAND LOGIC FUNCTIONING
-  bool buttonOutput[5] = {0, 0, 0, 0, 0}; //Send this to the server as logical choices of modes irrespective of buttons or LEDS.
-  bool buttonOutputCache[5] = {0, 0, 0, 0, 0}; // Last Server 'Sent' values to test if they have changed, i.e. sent again.
+  bool buttonStatus[5] = {0, 0, 0, 0, 0}; // READ ONLY! Button Status returned from hardware, this is the logical value.
 
-  bool buttonStatus[5] = {0, 0, 0, 0, 0}; // READ ONLY! Button Status returned from hardware for modes to process into Output.
-
-  byte masterMode = 0; // Device Master Modes: 0-(all LED off, no sensors) 1-(Freeze Answers ) 2-(True/False 1 of 2) 3-(Choose 1 of 3) 4-(Choose 1 of 4) 5-(Choose 1 of 5)
+  byte masterMode = 255; // Device Master Modes: 0-(all LED off, no sensors) 1-(Freeze Answers ) 2-(True/False 1 of 2) 3-(Choose 1 of 3) 4-(Choose 1 of 4) 5-(Choose 1 of 5)
                         // more...Choose Up tp 5 etc.. (Fast Buzz in ? )12-(Any of 2) 13-(Any of 3) 14-(Any of 4) 15-(Any of 5)
                         // 255-(TEST ALL buttons and LEDs)
 
   bool masterModeSetupToggle = 0;  // allows setup parameters to run only once in a new master mode.
-  byte previousMasterMode = 0;     // allows setup parameters to run only once in a new master mode.
+  byte previousMasterMode = 0;
 
   byte buttonMode[5] = {0, 0, 0, 0, 0};   // Button Mode Array 0-Disabled, 1-Interm, 2-ON/OFF 3-Inverted ON/OFF?
   bool LEDState[5] = {0, 0, 0, 0, 0};  // LED light effect on or off?
-  byte LEDMode[5]= {0, 0, 0, 0, 0};  // LED Effects Modes (0- Off, 1- Solid, 20-29 Flash (slow medium fast), 30-39 Pulse ((slow medium fast) Dim ? More LED arrays? or live with a "reset option" [!! Use % of Max inside functions]
+  byte LEDMode[5]= {0, 0, 0, 0, 0};  // LED Effects Modes (0- Off, 1- Solid, 20-29 Flash (fast medium slow), 30-39 Pulse ((fast medium slow) Dim ? More LED arrays? or live with a "reset option" [!! Use % of Max inside functions]
 
   byte LEDDim[5] =  {100, 100, 100, 100, 100};     // % of Allowable Bright LED is currently at. Used for dimmed modes.
 // !!!! VERY LOW #s ON 0, 3 ARE BROKEN  {3, 1, 4, 1, 1};
 // BETTER, have a function, Called that uses a single value LEDDIM (%) to calcluate and populate LEDCurBright for each LED. A reset (or function call to 100%) option to put back to LEDMaxBright.
-// Could be a differential table lookup/replace or calulations.
+// Could be a diferential table lookup/replace or calulations.
 // ----------------------------------------------------------------------------------
 void setup(){
   // Set TimeOut for unresponsive pins in mS Default is 2000 ms
@@ -73,17 +70,7 @@ void setup(){
 // ##################################################################################
 // FUNCTIONS =================================
 // ##################################################################################
-void ReceiveCommnds(){ // RECEIVE AND PARSE COMMANDS FROM SERVER.
-
-// NEEDS TO BE BUILT
-
-}
-// ##################################################################################
-void CommandInterp(){ // SETS THE DEVICE UP BASED ON MASTER MODE NUMBER SENT BY SERVER
-  // ======== EXECUTE SERVER COMMANDS-  =========
-
-
-
+void Command(){
   // ======== MASTER MODE 0 - STANDBY =========
   if (masterMode == 0){
     // Setup the new MODE one time
@@ -93,10 +80,6 @@ void CommandInterp(){ // SETS THE DEVICE UP BASED ON MASTER MODE NUMBER SENT BY 
     }
     if (masterModeSetupToggle == 0){
       // Setup stuff here
-      for (byte i = 0; i<=4; i++){ // Resets Button Output Values
-        if (buttonOutput [i] != 0){(buttonOutput [i] = 0);}
-        if (buttonOutputCache [i] != 0){(buttonOutputCache [i] = 0);}
-        }
       masterModeSetupToggle = 1;
     }
     // MODE LOGIC
@@ -107,7 +90,7 @@ void CommandInterp(){ // SETS THE DEVICE UP BASED ON MASTER MODE NUMBER SENT BY 
     }
   }// ==========================================================
 
-  // ======== MASTER MODE 1 - FREEZE Button Output/Status and Lights (can't be changed anymore) =========
+  // ======== MASTER MODE 1 - FREEZE Button Status and Lights (can't be changed anymore) =========
   if (masterMode == 1){
     // Setup the new MODE one time
     if (previousMasterMode != 1) {
@@ -133,94 +116,35 @@ void CommandInterp(){ // SETS THE DEVICE UP BASED ON MASTER MODE NUMBER SENT BY 
     }
     if (masterModeSetupToggle == 0){
       // Setup stuff here
-      for (byte i = 0; i<=4; i++){ // Resets Button Output Values
-        if (buttonOutput [i] != 0){(buttonOutput [i] = 0);}
-        if (buttonOutputCache [i] != 0){(buttonOutputCache [i] = 0);}
-        }
-      if (buttonMode [0] != 0){(buttonMode [0] = 0);} //0= OFF
-      if (buttonMode [1] != 1){(buttonMode [1] = 1);} //1= INTERMITENT
+      if (buttonMode [0] != 0){(buttonMode [0] = 0);}
+      if (buttonMode [1] != 1){(buttonMode [1] = 1);}
       if (buttonMode [2] != 0){(buttonMode [2] = 0);}
       if (buttonMode [3] != 1){(buttonMode [3] = 1);}
       if (buttonMode [4] != 0){(buttonMode [4] = 0);}
-      if (LEDMode [0] != 0){(LEDMode [0] = 0);} //0= OFF
-      if (LEDMode [1] != 1){(LEDMode [1] = 1);} //1=Solid On
+      if (LEDMode [0] != 0){(LEDMode [0] = 0);}
+      if (LEDMode [1] != 1){(LEDMode [1] = 1);}
       if (LEDMode [2] != 0){(LEDMode [2] = 0);}
       if (LEDMode [3] != 1){(LEDMode [3] = 1);}
       if (LEDMode [4] != 0){(LEDMode [4] = 0);}
-
-      if (LEDState [1] != 1){(LEDState [1] = 1);}
-      if (LEDState [3] != 1){(LEDState [3] = 1);}
       masterModeSetupToggle = 1;
     }
     // MODE LOGIC
     if (buttonStatus[1] == 1 && buttonStatus[3] == 0)
-      { LEDMode[1] = 28; //28= flash fast
-        buttonOutput[1] = 1;
-        LEDMode[3] = 1; //1=Solid On
-        buttonOutput[3] = 0;
+      { LEDState[1] == 1;
+        LEDState[3] == 0;
       }
     if (buttonStatus[1] == 0 && buttonStatus[3] == 1)
-      { LEDMode[1] = 1;
-        buttonOutput[1] = 0;
-        LEDMode[3] = 28;
-        buttonOutput[3] = 1;
+      { LEDState[1] == 1;
+        LEDState[3] == 0;
       }
-      if (buttonStatus[1] == 1 && buttonStatus[3] == 1)
-        { LEDMode[1] = 1;
-          buttonOutput[1] = 0;
-          LEDMode[3] = 1;
-          buttonOutput[3] = 0;
-        }
-  }// ==========================================================
 
+  }// ==========================================================
   // MORE Master Modes here....
   // MORE Master Modes here....
     // MORE Master Modes here....
       // MORE Master Modes here....
         // MORE Master Modes here....
           // MORE Master Modes here....
-
-// ======== MASTER MODE 200 - DEVICE "PING"-SEND BOGUS STATUS TO SERVER, THEN STANDBY
-if (masterMode == 200){
-  // Setup the new MODE one time
-  if (previousMasterMode != 200) {
-    masterModeSetupToggle = 0;
-    previousMasterMode = 200;
-    }
-  if (masterModeSetupToggle == 0){
-    for (byte i = 0; i<=4; i++){buttonOutput[i] = 1;} // Forces UpdateServer function to run.
-    for (byte i = 0; i<=4; i++){buttonOutputCache[i] = 0;}
-    masterMode = 0;
-    masterModeSetupToggle = 1;
-    }
-  }// ==========================================================
-
-// ======== MASTER MODE 254 - TEST ALL BUTTONS and LEDs ========= If buttonStatus is high, flash the LED!
-if (masterMode == 254){
-  // Setup the new MODE one time
-  if (previousMasterMode != 254) {
-    masterModeSetupToggle = 0;
-    previousMasterMode = 254;
-    }
-  if (masterModeSetupToggle == 0){
-    // Setup stuff here
-    for (byte i = 0; i<=4; i++){
-      if (buttonMode [i] != 1){(buttonMode [i] = 1);} // 1= INTERMITENT
-      if (LEDMode [i] != 1){(LEDMode [i] = 1);} // 1= SOLID
-      if (LEDState [i] != 1){(LEDState [i] = 1);} // 1= ON
-      masterModeSetupToggle = 1;
-      }
-    }
-  // MODE LOGIC
-    for (byte i = 0; i<=4; i++){
-    if (buttonStatus[i] == 1) {
-      if (LEDMode[i] != 29){LEDMode[i] = 29;}
-      }
-    if (buttonStatus[i] == 0) {
-      if (LEDMode[i] != 1){LEDMode[i] = 1;}
-      }
-    }
-  }// ==========================================================
 
   // ======== MASTER MODE 255 - TEST ALL BUTTONS and LEDs ========= If buttonStatus is high, light the LED!
   if (masterMode == 255){
@@ -240,13 +164,6 @@ if (masterMode == 254){
       LEDState[i] = buttonStatus[i];
     }
   }// ==========================================================
-}
-// ##################################################################################
-void UpdateServer(){ // TEST FOR CHANGES IN buttonOutput AND SEND TO SERVER.
-  if (buttonOutput[0] != buttonOutputCache[0] || buttonOutput[1] != buttonOutputCache[1] || buttonOutput[2] != buttonOutputCache[2] || buttonOutput[3] != buttonOutputCache[3] || buttonOutput[4] != buttonOutputCache[4]){
-  // Send entire buttonOutput array? to make parsing easier???
-  for (byte i = 0; i<=4; i++){buttonOutputCache[i] = buttonOutput[i];} // preserve what was sent to cache.
-  }
 }
 // ##################################################################################
 void UpdateLEDS(){
@@ -273,7 +190,7 @@ void UpdateLEDS(){
         else if (LEDMode[i] == 28){LEDperiod[i] = 100;}
         else if (LEDMode[i] == 29){LEDperiod[i] =  50;}
 
-        if (LEDState[i] == 1){
+        if (buttonStatus[i] == 1){
           if (LEDNextUpdate[i] <= millis() ){
             if  (LEDCurValue[i] == LEDCurBright[i]){
                 LEDCurValue[i] = 0;
@@ -341,11 +258,9 @@ void GetButtonStatus(){
 }
 // ##################################################################################
 void loop(){
-  ReceiveCommnds();
-  CommandInterp();
+  Command();
   GetButtonStatus();
   UpdateLEDS();
-  UpdateServer();
 }
 // ##################################################################################
 /* NOTES ===========================================================================
