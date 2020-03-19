@@ -235,8 +235,10 @@ if (masterMode == 254){
 // ##################################################################################
 void UpdateServer(){ // TEST FOR CHANGES IN buttonOutput AND SEND TO SERVER.
   if (buttonOutput[0] != buttonOutputCache[0] || buttonOutput[1] != buttonOutputCache[1] || buttonOutput[2] != buttonOutputCache[2] || buttonOutput[3] != buttonOutputCache[3] || buttonOutput[4] != buttonOutputCache[4]){
-  // Send entire buttonOutput array? to make parsing easier???
   for (byte i = 0; i<=4; i++){buttonOutputCache[i] = buttonOutput[i];} // preserve what was sent to cache.
+
+  // Send entire buttonOutput array? to make parsing easier???
+
   }
 }
 // ##################################################################################
