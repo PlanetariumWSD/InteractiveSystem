@@ -1,5 +1,6 @@
 #include <Arduino.h> //Required for Atom Editor
 #include <CapacitiveSensor.h>
+#include <Ethernet.h>
 /* INTERACTIVE SYSTEM FOR ARM RESTS IN PLANETARIUM INTRO
 ===========================================================
 Hardware API for Server Control ========================
