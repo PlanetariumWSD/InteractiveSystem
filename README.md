@@ -18,5 +18,5 @@ Planetarium Arm Chair Buttons: Users press buttons on Arduino Ethernet boards, w
 ## Future Improvements
 * This program still needs a method to have eeprom data modified by server (e.g. `sensorThreshold`, `maxLedBrightness`, etc)
     * If `maxLedBrightness` is implemented, then the server's brightness value could be a percentage of maxLedBrightness instead of an absolute value
-* This program does not have any LED lighting effects--it only employs simple on and off. In a previous commit, I had JLed functions employed, but this used up too much flash and RAM.
+* This program does not have any LED lighting effects--it only employs simple on and off. In a previous commit, I had JLed functions employed, but this used up too much flash and RAM. This attempt can be found [here](https://github.com/PlanetariumWSD/InteractiveSystem-Client/commit/8bf9fbcb5a93130a3ccc170112060ffce1fa4a81).
 * In order to accomodate the above features, more memory efficient alternatives to the Arduino `String` class should be used.
