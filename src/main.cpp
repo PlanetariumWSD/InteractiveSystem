@@ -30,13 +30,22 @@ StaticJsonDocument<MAX_SETTING_SIZE> setting;
 byte previousButtonChoice = -1;
 struct Button
 {
+public:
   CapacitiveSensor sensor;
-  byte ledPin;
   long sensorThreshold = 200;
+
   Button(uint8_t sensorPin, byte ledPin_) : sensor(2, sensorPin), ledPin(ledPin_)
   {
     sensor.set_CS_Timeout_Millis(50);
   }
+
+  void setLed(byte brightness)
+  {
+    analogWrite(ledPin, brightness);
+  }
+
+private:
+  byte ledPin;
 };
 
 Button buttons[5] = {
@@ -64,23 +73,26 @@ void checkWS()
     deserializeJson(setting, ws.readString());
     for (byte i = 0; i < 4; i++)
     {
-      analogWrite(buttons[i].ledPin, setting[i]["brightness"]);
+      buttons[i].setLed(setting[i]["brightness"]);
     }
   }
 }
 
 void checkButtons()
 {
-  for (byte i = 0; i < 4; i++)
+  for (byte newConsideration = 0; newConsideration < 4; newConsideration++)
   {
-    if (previousButtonChoice != i && setting[i]["live"] && buttons[i].sensor.capacitiveSensor(30) > buttons[i].sensorThreshold)
+    if (
+        previousButtonChoice != newConsideration &&
+        setting[newConsideration]["live"] &&
+        buttons[newConsideration].sensor.capacitiveSensor(30) > buttons[newConsideration].sensorThreshold)
     {
-      http.post("/states/" + SEAT_NUM, "application/json", "{ \"press\": \"" + String(i) + "\" }"); // TODO: create `intToString()` to replace `String()`
-      analogWrite(buttons[i].ledPin, setting[i]["brightness"]);
-      for (byte i_ = 0; i_ < 4; i_++)
-        if (i_ != i)
-          analogWrite(buttons[i_].ledPin, 0);
-      previousButtonChoice = i;
+      http.post("/states/" + SEAT_NUM, "application/json", "{ \"press\": \"" + String(newConsideration) + "\" }"); // TODO: create `intToString()` to replace `String()`
+      buttons[newConsideration].setLed(setting[newConsideration]["brightness"]);
+      for (byte i = 0; i < 4; i++)
+        if (i != newConsideration)
+          buttons[i].setLed(0);
+      previousButtonChoice = newConsideration;
     }
   }
 }
