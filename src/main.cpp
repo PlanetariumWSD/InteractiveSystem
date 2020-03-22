@@ -76,17 +76,10 @@ void checkButtons()
     if (previousButtonChoice != i && setting[i]["live"] && buttons[i].sensor.capacitiveSensor(30) > buttons[i].sensorThreshold)
     {
       http.post("/states/" + SEAT_NUM, "application/json", "{ \"press\": \"" + String(i) + "\" }"); // TODO: create `intToString()` to replace `String()`
-      if (previousButtonChoice == -1)
-      {
-        for (byte i_ = 0; i_ < 4; i_++)
-          if (i_ != i)
-            analogWrite(buttons[i_].ledPin, 0);
-      }
-      else
-      {
-        analogWrite(buttons[i].ledPin, setting["brightness"]);
-        analogWrite(buttons[previousButtonChoice].ledPin, 0);
-      }
+      analogWrite(buttons[i].ledPin, setting[i]["brightness"]);
+      for (byte i_ = 0; i_ < 4; i_++)
+        if (i_ != i)
+          analogWrite(buttons[i_].ledPin, 0);
       previousButtonChoice = i;
     }
   }
