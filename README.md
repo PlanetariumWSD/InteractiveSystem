@@ -5,6 +5,33 @@ Planetarium Arm Chair Buttons: Users press buttons on Arduino Ethernet boards, w
 1. Set up InteractiveSystem-Server as described in its README.md.
 1. Using an IDE with PlatformIO installed, set the server and client variables to their desired values.
 1. Use PlatformIO to install this program onto the desired Arduino Ethernet(s). The dependencies will be installed automatically.
+1. The server will send JSON data to the Arduino through Websockets in the following form:
+    ```
+    [
+        {
+            "live": true,
+            "brightness": 255
+        },
+        {
+            "live": false,
+            "brightness": 0
+        },
+        {
+            "live": true,
+            "brightness": 255
+        },
+        {
+            "live": false,
+            "brightness": 15
+        },
+        {
+            "live": true,
+            "brightness": 100
+        }
+    ]
+    ```
+    Each item in the array represents one of the buttons. `live === true` says "send every new button press to the server". `live === false` says "ignore this button". `brightness` is the brightness to set a button to once it has been pressed. All other buttons are set to 0 brightness. (All buttons start at `brightness` brightness before any have been pressed.)
+        * Data is sent to the server via an HTTP POST to the endpoint `/states/:seatNum`. The JSON posted is of the following form, where `latestPress` is the ID of the new button that has been pressed: `{ "latestPress": 1}`.
 
 ## Notes
 * Websockets, HTTP POST, and JSON parsing have been tested. LED lighting, and capacitive touch sensors have not.
