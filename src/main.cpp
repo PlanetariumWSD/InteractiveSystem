@@ -8,12 +8,11 @@
 #include <ArduinoHttpClient.h>
 #include <ArduinoJson.h>
 #include <CapacitiveSensor.h>
-#include <jled.h>
 
 // Server info
 const char SERVER_ADDRESS[] = "192.168.1.10";
 const int SERVER_PORT = 3000;
-const int MAX_SETTING_SIZE = 350;
+const int MAX_SETTING_SIZE = 320;
 
 // Client info
 const String SEAT_NUM = "1"; // TODO: using `String` is wasteful, figure out an alternative method
