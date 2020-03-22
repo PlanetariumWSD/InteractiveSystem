@@ -32,9 +32,9 @@ byte previousButtonChoice = -1;
 struct Button
 {
   CapacitiveSensor sensor;
-  JLed led;
+  byte ledPin;
   long sensorThreshold = 200;
-  Button(uint8_t sensorPin, byte ledPin) : sensor(2, sensorPin), led(ledPin)
+  Button(uint8_t sensorPin, byte ledPin_) : sensor(2, sensorPin), ledPin(ledPin_)
   {
     sensor.set_CS_Timeout_Millis(50);
   }
@@ -57,26 +57,6 @@ void setup()
   ws.begin("/settings/" + SEAT_NUM);
 }
 
-void runJledFunction(char *function, int parameter, byte i)
-{
-  if (strcmp(function, "On") == 0)
-    buttons[i].led.On();
-  if (strcmp(function, "Off") == 0)
-    buttons[i].led.Off();
-  if (strcmp(function, "Set") == 0)
-    buttons[i].led.Set(parameter);
-  if (strcmp(function, "Blink") == 0)
-    buttons[i].led.Blink(parameter, parameter).Forever();
-  if (strcmp(function, "Breathe") == 0)
-    buttons[i].led.Breathe(parameter).Forever();
-  if (strcmp(function, "Candle") == 0)
-    buttons[i].led.Candle(7, parameter, 65535).Forever();
-  if (strcmp(function, "FadeOn") == 0)
-    buttons[i].led.FadeOn(parameter);
-  if (strcmp(function, "FadeOff") == 0)
-    buttons[i].led.FadeOff(parameter);
-}
-
 void checkWS()
 {
   if (ws.parseMessage() > 0)
@@ -85,7 +65,7 @@ void checkWS()
     deserializeJson(setting, ws.readString());
     for (byte i = 0; i < 4; i++)
     {
-      runJledFunction(setting[i]["led"]["ambient"]["function"], setting[i]["led"]["ambient"]["parameter"], i);
+      analogWrite(buttons[i].ledPin, setting[i]["brightness"]);
     }
   }
 }
@@ -101,12 +81,12 @@ void checkButtons()
       {
         for (byte i_ = 0; i_ < 4; i_++)
           if (i_ != i)
-            runJledFunction(setting[i]["led"]["nonChoice"]["function"], setting[i]["nonChoice"]["parameter"], i);
+            analogWrite(buttons[i_].ledPin, 0);
       }
       else
       {
-        runJledFunction(setting[i]["led"]["ambient"]["function"], setting[i]["led"]["ambient"]["parameter"], i);
-        runJledFunction(setting[i]["led"]["nonChoice"]["function"], setting[i]["led"]["nonChoice"]["parameter"], previousButtonChoice);
+        analogWrite(buttons[i].ledPin, setting["brightness"]);
+        analogWrite(buttons[previousButtonChoice].ledPin, 0);
       }
       previousButtonChoice = i;
     }
@@ -117,11 +97,6 @@ void loop()
 {
   checkWS();
   checkButtons();
-
-  for (byte i = 0; i < 4; i++)
-  {
-    buttons[i].led.Update();
-  }
 }
 
 /* NOTES ===========================================================================
